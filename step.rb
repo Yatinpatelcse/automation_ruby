@@ -91,26 +91,29 @@ def time_interval(inter_val_num=15)
 
 end
 
-################################################
+#############################################################################################
 ### generating Date based on the argument passed
-### example: get_date() --2017/04/28 --current date
+### By default offset=0, gives current Date with all argument nil
+###offset = -1, gives past date with atleast one argument need to be passed along offset
+###offset = 1, gives future date with atleast one argument need to be passed along offset
+#############################################################################################
+### example: get_date() --2017/04/28 --- 04/28/2017
 #### Future Date below
-### example: get_date(2,2,2,1) --- 2019/06/30
-### example: get_date(2,2,nil,1) --- 2017/06/30
-### example: get_date(2,nil,2,1) --- 2019/04/30
-### example: get_date(2,nil,nil,1) --- 2017/04/30
-### example: get_date(nil,2,2,1) --- 2019/06/28
-### example: get_date(nil,2,nil,1) --- 2017/06/28
-### example: get_date(nil,nil,2,1) --- 2019/04/28
+### example: get_date(2,2,2,1) ---  06/30/2019
+### example: get_date(2,2,nil,1) --- 06/30/2017
+### example: get_date(2,nil,2,1) --- 04/30/2019
+### example: get_date(2,nil,nil,1) --- 04/30/2017
+### example: get_date(nil,2,2,1) --- 06/28/2019
+### example: get_date(nil,2,nil,1) --- 06/28/2017
+### example: get_date(nil,nil,2,1) --- 04/28/2019
 #### Past Date below
-### example: get_date(2,2,2,-1) --- 2015/02/26
-### example: get_date(2,2,nil,-1)--- 2017/02/26
-### example: get_date(2,nil,2,-1)--- 2015/04/26
-### example: get_date(2,nil,nil,-1)--- 2017/04/26
-### example: get_date(nil,2,2,-1)--- 2015/02/28
-### example: get_date(nil,2,nil,-1)--- 2017/02/28
-### example: get_date(nil,nil,2,-1)--- 2015/04/28
-
+### example: get_date(2,2,2,-1) --- 02/26/2015
+### example: get_date(2,2,nil,-1)--- 02/26/2017
+### example: get_date(2,nil,2,-1)--- 04/26/2015
+### example: get_date(2,nil,nil,-1)--- 04/26/2017
+### example: get_date(nil,2,2,-1)--- 02/28/2015
+### example: get_date(nil,2,nil,-1)--- 02/28/2017
+### example: get_date(nil,nil,2,-1)--- 04/28/2015
 ################################################
 
 def get_date(day=nil, month=nil, year=nil, offset=0)
@@ -181,22 +184,40 @@ def get_date(day=nil, month=nil, year=nil, offset=0)
     end
   elsif day == nil &&	month == nil &&	year == nil && offset == 0
     @com_date = cur_date
+  else
+    fail("Invalid Argument Passed to get date method. Please enter correct arguments")
   end
-return @com_date.strftime("%Y/%m/%d").to_s
+return @com_date.strftime("%m/%d/%Y").to_s
 end
 
-################################################
-### generating Date Range based on the argument passed
+#######################################################
+### generating Date Range based on the argument passed with current date
 
+### example:date_range(nil,nil,nil,nil,nil,nil) --- ["04/28/2017", "04/28/2017"]
+### example:date_range(2,2,2,2,2,2) --- ["02/26/2015", "06/30/2019"]
+### example:date_range(2,2,2,nil,nil,nil) --- ["02/26/2015", "04/28/2017"]
+### example:date_range(nil,nil,nil,2,2,2) --- ["04/28/2017", "06/30/2019"]
+### example:date_range(nil,nil,nil,nil,2,2) --- ["04/28/2017", "06/28/2019"]
+### example:date_range(nil,2,2,nil,nil,nil) --- ["02/28/2015", "04/28/2017"]
+### example:date_range(2,nil,nil,2,nil,nil) --- ["04/26/2017", "04/30/2017"]
 
+#######################################################
 
-def date_range()
-
+def date_range(past_day=nil, past_month=nil, past_year=nil, future_day=nil, future_month=nil,future_year=nil)
+  if (past_day != nil || past_month != nil || past_year != nil) && (future_day != nil || future_month != nil || future_year != nil)
+  start_date = get_date(past_day,past_month,past_year,-1)
+  end_date = get_date(future_day,future_month,future_year, 1)
+  elsif past_day == nil && past_month == nil && past_year == nil && future_day == nil && future_month == nil && future_year == nil
+    start_date = get_date(nil,nil,nil,0)
+    end_date = get_date(nil,nil,nil,0)
+  elsif (past_day == nil && past_month == nil && past_year == nil) && (future_day != nil || future_month != nil || future_year != nil)
+    start_date = get_date(nil,nil,nil,0)
+    end_date = get_date(future_day,future_month,future_year,1)
+  elsif (past_day != nil || past_month != nil || past_year == nil) && (future_day == nil && future_month == nil && future_year == nil)
+    start_date = get_date(past_day,past_month,past_year, -1)
+    end_date = get_date(nil,nil,nil,0)
+  else
+    fail("Invalid Argument Passed to date range method. Please enter correct arguments")
+  end
+  return start_date,end_date
 end
-
-
-
-
-
-
-
