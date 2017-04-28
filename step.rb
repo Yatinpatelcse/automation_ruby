@@ -1,36 +1,36 @@
-####################
-##### Load Data ####
-####################
+###################
+#### Load Data ####
+###################
 
-# def read_excel(name)
-#   require 'roo'
-#   require 'spreadsheet'
-#   @myRoot = File.join(File.dirname(__FILE__), '/')
-#   book = Roo::Spreadsheet.open("#{@myRoot}/#{name}.xlsx", extension: :xlsx)
-#
-#   obj_repo = book.sheet("object")
-#   # Loading the data from "object" spreedsheet
-#   @obj_repo_row = {}
-#   obj_repo.each do |row|
-#     row.each do |x|
-#       @obj_repo_row[row[0]] = row[1..11]
-#     end
-#   end
-#
-#   user_data = book.sheet("data")
-#   # Loading the data from "data" spreedsheet
-#   @user_data_row = {}
-#   user_data.each do |row|
-#     row.each do |x|
-#       @user_data_row[row[0]] = row[1]
-#     end
-#   end
-#
-#   # Removing the first row data from the excel(column name).
-#   @obj_repo_row.delete('Key')
-#   @user_data_row.delete('Key')
-#
-# end
+def read_excel(name)
+  require 'roo'
+  require 'spreadsheet'
+  @myRoot = File.join(File.dirname(__FILE__), '/')
+  book = Roo::Spreadsheet.open("#{@myRoot}/#{name}.xlsx", extension: :xlsx)
+
+  obj_repo = book.sheet("object")
+  # Loading the data from "object" spreedsheet
+  @obj_repo_row = {}
+  obj_repo.each do |row|
+    row.each do |x|
+      @obj_repo_row[row[0]] = row[1..11]
+    end
+  end
+
+  user_data = book.sheet("data")
+  # Loading the data from "data" spreedsheet
+  @user_data_row = {}
+  user_data.each do |row|
+    row.each do |x|
+      @user_data_row[row[0]] = row[1]
+    end
+  end
+
+  # Removing the first row data from the excel(column name).
+  @obj_repo_row.delete('Key')
+  @user_data_row.delete('Key')
+
+end
 
 ######################################################
 ### Below method Used for create the unique Name
@@ -93,6 +93,23 @@ end
 
 ################################################
 ### generating Date based on the argument passed
+### example: get_date() --2017/04/28 --current date
+#### Future Date below
+### example: get_date(2,2,2,1) --- 2019/06/30
+### example: get_date(2,2,nil,1) --- 2017/06/30
+### example: get_date(2,nil,2,1) --- 2019/04/30
+### example: get_date(2,nil,nil,1) --- 2017/04/30
+### example: get_date(nil,2,2,1) --- 2019/06/28
+### example: get_date(nil,2,nil,1) --- 2017/06/28
+### example: get_date(nil,nil,2,1) --- 2019/04/28
+#### Past Date below
+### example: get_date(2,2,2,-1) --- 2015/02/26
+### example: get_date(2,2,nil,-1)--- 2017/02/26
+### example: get_date(2,nil,2,-1)--- 2015/04/26
+### example: get_date(2,nil,nil,-1)--- 2017/04/26
+### example: get_date(nil,2,2,-1)--- 2015/02/28
+### example: get_date(nil,2,nil,-1)--- 2017/02/28
+### example: get_date(nil,nil,2,-1)--- 2015/04/28
 
 ################################################
 
@@ -117,20 +134,20 @@ def get_date(day=nil, month=nil, year=nil, offset=0)
 
     if day != nil && month == nil && year != nil
       @com_date = cur_date - day
-      @com_date = @com_date << 12 * Year
+      @com_date = @com_date << 12 * year
     end
     if day != nil && month == nil && year == nil
       @com_date = cur_date - day
     end
     if day == nil && month != nil && year != nil
       @com_date = cur_date << month
-      @com_date = @com_date << 12 * Year
+      @com_date = @com_date << 12 * year
     end
     if day == nil && month != nil && year == nil
       @com_date = cur_date << month
     end
     if day == nil && month == nil && year != nil
-      @com_date = cur_date << 12 * Year
+      @com_date = cur_date << 12 * year
     end
 
   elsif offset > 0
@@ -162,15 +179,24 @@ def get_date(day=nil, month=nil, year=nil, offset=0)
     if day == nil && month == nil && year != nil
       @com_date = cur_date >> 12 * year
     end
-  else
+  elsif day == nil &&	month == nil &&	year == nil && offset == 0
     @com_date = cur_date
   end
 return @com_date.strftime("%Y/%m/%d").to_s
 end
 
-puts get_date
-a = get_date(2,2,2,1)
-b = get_date(2,2,2,-1)
-puts a
-puts b
+################################################
+### generating Date Range based on the argument passed
+
+
+
+def date_range()
+
+end
+
+
+
+
+
+
 
