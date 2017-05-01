@@ -226,15 +226,12 @@ end
 ############################################################
 ### validate the length of text field or textarea
 ############################################################
-def generate_rand_str(len)
-  o = [('a'..'z'), ('A'..'Z')].map(&:to_a).flatten
-  str = (0...len).map { o[rand(o.length)] }.join
-  puts "generate random string => #{str}"
-  return str
-end
-
 def val_element_length(element, exp_size)
-  exp_len_str = generate_rand_str(exp_size)
+
+  o = [('a'..'z'), ('A'..'Z')].map(&:to_a).flatten
+  exp_len_str = (0...exp_size).map { o[rand(o.length)] }.join
+  puts "generate random string => #{exp_len_str}"
+
   act_len_str = "#{exp_len_str}extra"
 
   if element.attribute_value('maxlength').to_i != nil
@@ -265,3 +262,46 @@ def val_element_length(element, exp_size)
     fail("Actual Element Value Count: #{run_time_str.size} != Expected Element Value Count: #{exp_size}")
   end
 end
+
+#######################################################
+### Generating Random String
+#######################################################
+
+def generate_random_aplhabet_string(len)
+  o = [('a'..'z'), ('A'..'Z')].map(&:to_a).flatten
+  str = (0...len).map { o[rand(o.length)] }.join
+  puts "generate random string => #{str}"
+  return str
+end
+
+def generate_random_num_string(len)
+  o = [('0'..'9'), ('0'..'9')].map(&:to_a).flatten
+  str = (0...len).map { o[rand(o.length)] }.join
+  puts "generate random string => #{str}"
+  return str
+end
+
+def generate_random_alphanumeric_string(len)
+  o = [('0'..'9'),('a'..'z'),('0'..'9')].map(&:to_a).flatten
+  str = (0...len).map { o[rand(o.length)] }.join
+  puts "generate random string => #{str}"
+  return str
+end
+
+
+###################################################
+### Encoding and Decoding string
+###################################################
+
+def encode_str(str)
+  require "base64"
+  encoded_str=Base64.encode64(str)
+  return encoded_str
+end
+
+def decode_str(str)
+  require "base64"
+  decoded_str = Base64.decode64(str)
+  return decoded_str
+end
+
