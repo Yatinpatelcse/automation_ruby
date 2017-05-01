@@ -221,3 +221,47 @@ def date_range(past_day=nil, past_month=nil, past_year=nil, future_day=nil, futu
   end
   return start_date,end_date
 end
+
+
+############################################################
+### validate the length of text field or textarea
+############################################################
+def generate_rand_str(len)
+  o = [('a'..'z'), ('A'..'Z')].map(&:to_a).flatten
+  str = (0...len).map { o[rand(o.length)] }.join
+  puts "generate random string => #{str}"
+  return str
+end
+
+def val_element_length(element, exp_size)
+  exp_len_str = generate_rand_str(exp_size)
+  act_len_str = "#{exp_len_str}extra"
+
+  if element.attribute_value('maxlength').to_i != nil
+    if element.attribute_value('maxlength').to_i == exp_size.to_i
+      element.send_keys act_len_str
+    end
+  end
+
+  if element.value == ""
+    element.send_keys act_len_str
+  end
+
+  #### comparing the Value with maxlength
+  if element.attribute_value('maxlength').to_i != nil
+    ele_max_len = element.attribute_value('maxlength').to_i
+    if ele_max_len != exp_size
+      puts ("Actual Element Maxlength: #{ele_max_len} != Expected Element Maxlength: #{exp_size}")
+
+    end
+  end
+
+  run_time_str =element.value
+  if run_time_str.size == exp_size
+    if run_time_str != exp_len_str
+      fail("Actual Element Value #{run_time_str} != Expected Element Value #{exp_len_str}")
+    end
+  else
+    fail("Actual Element Value Count: #{run_time_str.size} != Expected Element Value Count: #{exp_size}")
+  end
+end
