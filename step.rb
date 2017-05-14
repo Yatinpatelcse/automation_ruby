@@ -11,6 +11,7 @@ def open_firefox_using_profile
   require 'watir-webdriver'
   download_directory = "C:\\Users\\Yatin\\Downloads"
   profile = Selenium::WebDriver::Firefox::Profile.new
+
   profile['credentials_enable_service'] = false
   ### file will be downloaded to custom directory
   profile['browser.download.folderList'] = 2
@@ -24,6 +25,38 @@ def open_firefox_using_profile
   # @browser = Watir::Browser.new(driver)
   @browser = Watir::Browser.new :firefox,  :profile => profile
 
+end
+
+#browser
+#:firefox (default)
+#:chrome
+#agent
+#:iphone (default)
+#:ipad
+#:android_phone
+#:android_tablet
+#:random
+#orientation
+#:portrait (default)
+#:landscape
+
+def browser_user_agent(browser, agent, orientation)
+setup_watir_webdriver
+browser ="firefox"
+agent = "iphone"
+orientation="portrait"
+require 'watir-webdriver'
+require 'webdriver-user-agent'
+driver = Webdriver::UserAgent.driver(:browser => :"#{browser}", :agent => :"#{agent}", :orientation => :"#{orientation}")
+browser = Watir::Browser.new(driver)
+end
+
+#iphone
+#width=667, height=375 - landscape
+#width=375, height=559 - portrait
+
+def window_size()
+	@browser.window.resize_to(x, y)
 end
 
 def open_chrome_using_profile
