@@ -1,3 +1,86 @@
+#########################################################################
+### browser profile initialization
+### Reference: https://github.com/SeleniumHQ/selenium/wiki/Ruby-Bindings
+### Require: geckodriver-v0.16.1
+### Require: Selenium webdriver 3.4.0
+##########################################################################
+
+def open_firefox_using_profile
+
+  # setup_watir_webdriver
+  require 'watir-webdriver'
+  download_directory = "C:\\Users\\Yatin\\Downloads"
+  profile = Selenium::WebDriver::Firefox::Profile.new
+  profile['credentials_enable_service'] = false
+  ### file will be downloaded to custom directory
+  profile['browser.download.folderList'] = 2
+  profile['browser.download.dir'] = download_directory
+  ### By Default file will be downloaded to Download directory
+  # profile['browser.download.folderList'] = 1 # 0 = save to user's desktop, 1 = save to Downloads, 2 = save to custom location
+  # profile["browser.download.useDownloadDir"] = true
+  profile['browser.download.manager.showWhenStarting'] = false
+  profile['browser.helperApps.neverAsk.saveToDisk'] = "text/csv, text/plain, application/vnd.ms-excel, text/comma-separated-values, application/pdf, application/zip"
+  # driver = Selenium::WebDriver.for :firefox, :profile => profile
+  # @browser = Watir::Browser.new(driver)
+  @browser = Watir::Browser.new :firefox,  :profile => profile
+
+end
+
+def open_chrome_using_profile
+
+  # setup_watir_webdriver
+  require 'watir-webdriver'
+  download_directory = "C:\\Users\\Yatin\\Downloads"
+  profile = Selenium::WebDriver::Chrome::Profile.new
+  profile['credentials_enable_service'] = false
+  profile['download.prompt_for_download'] = false
+  profile['download.default_directory'] = download_directory
+  profile['browser.helperApps.neverAsk.saveToDisk'] = "text/csv, text/plain, application/vnd.ms-excel, text/comma-separated-values, application/pdf, application/zip"
+
+  @browser = Watir::Browser.new :chrome,  :profile => profile , :switches => %w[--ignore-certificate-errors --disable-popup-blocking --disable-translate]
+end
+
+
+def open_internet_explorer_using_profile
+  require 'watir-webdriver'
+
+  setup_watir_webdriver
+
+  client         = Selenium::WebDriver::Remote::Http::Default.new
+  client.timeout = 300 # seconds – default is 60
+  caps           = Selenium::WebDriver::Remote::Capabilities.internet_explorer(
+      #:nativeEvents => false,
+      #:requireWindowFocus => true,
+      :initialBrowserUrl              => 'about:blank',
+      :enablePersistentHover          => false,
+      :ignoreProtectedModeSettings    => true,
+      'ie.ensureCleanSession'         => true,
+      :unexpectedAlertBehaviour       => 'ignore'
+  )
+  @browser       = Watir::Browser.new :ie, :http_client => client, :desired_capabilities => caps
+
+
+
+
+end
+
+
+
+def open_edge_using_profile
+
+  require 'watir-webdriver'
+  download_directory = "C:\\Users\\Yatin\\Downloads"
+  profile = Selenium::WebDriver::Chrome::Profile.new
+  profile['credentials_enable_service'] = false
+  profile['download.prompt_for_download'] = false
+  profile['download.default_directory'] = download_directory
+  profile['browser.helperApps.neverAsk.saveToDisk'] = "text/csv, text/plain, application/vnd.ms-excel, text/comma-separated-values, application/pdf, application/zip"
+
+  @browser = Watir::Browser.new :edge,  :profile => profile , :switches => %w[--ignore-certificate-errors --disable-popup-blocking --disable-translate]
+
+end
+
+
 ###################
 #### Load Data ####
 ###################
@@ -267,7 +350,7 @@ end
 ### Generating Random String
 #######################################################
 
-def generate_random_aplhabet_string(len)
+def generate_random_alphabetical_string(len)
   o = [('a'..'z'), ('A'..'Z')].map(&:to_a).flatten
   str = (0...len).map { o[rand(o.length)] }.join
   puts "generate random string => #{str}"
@@ -304,4 +387,180 @@ def decode_str(str)
   decoded_str = Base64.decode64(str)
   return decoded_str
 end
+
+#####################################################
+### File Upload Using Rautomation
+### Refernce: http://itreallymatters.net/post/2352350743/automating-windows-and-their-controls-with-ruby#.WQjSTFHyvIU
+### filepath = C:\\Users\\Yatin\\Downloads\\images.jpg
+### specify title (other then "Open" "File Upload" or "Choose File to Uplaod")
+#####################################################
+
+def file_upload_using_r_automation (filepath,window_title=nil)
+
+  if window_title.nil?
+    if @params and @params['browser'] != nil
+      browser_type = @params['browser']
+    else
+      fail("Failed unrecognized browser type, Please check the Params under the manifest.json")
+    end
+
+    case browser_type.downcase
+      when "gc","chrome","edge"
+        title = "Open"
+      when "ff","firefox"
+        title = "File Upload"
+      when "ie"
+        title = "Choose File to Uplaod"
+      else
+        fail("Failed unrecognized browser type, Please check the Params under the manifest.json")
+    end
+  else
+    title = window_title
+  end
+  require "rautomation"
+  window = RAutomation::Window.new :title => title
+
+  if window.exists?
+    ### validate the File Name Text_field exists,
+    ### if exists then enter the Path
+    if window.text_field(:class => "Edit", :index => 0).exists?
+    textField=window.text_field(:class => "Edit", :index => 0)
+    textField.set filepath
+    else
+      fail("Failed to Find the FileName Text Field")
+    end
+
+    ### Validate the Text_field is not empty after filepath added
+    if textField.value == ""
+      fail("Edit Text Field is Empty")
+    end
+
+    ### Validate the Open button exists
+    ### if exists then perform click on Open button
+    if window.button(:value => "&Open").exists?
+      window.button(:value => "&Open").click
+    else
+      fail "Failed to Find Open button on window dialog box"
+    end
+
+    ### Validate After Clicking Open button the window dialog box should not exists
+    if window.exists?
+      fail "Window dialog box still exists even after clicking on Open button"
+    end
+  else
+    fail "Failed to Initialize the Window"
+  end
+end
+
+
+### Reference https://help4qa.wordpress.com/2012/03/17/selenium-easy-way-to-handeling-file-download-dialog-box/
+### https://www.autoitscript.com/site/autoit/downloads/
+
+def downlaod_file_and_save
+  win = RAutomation::Window.new :title => /Opening rautomation/
+  p win.present?
+  p win.controls.length
+  p win.text
+  win.button(:value => "&Save").click
+  win.close
+end
+
+
+
+def download_file_using_chrome (filepath)
+
+  title = "Save As"
+  require "rautomation"
+  window = RAutomation::Window.new :title => title
+
+  if window.exists?
+    ### validate the File Name Text_field exists,
+    ### if exists then enter the Path
+    if window.text_field(:class => "Edit", :index => 0).exists?
+      textField=window.text_field(:class => "Edit", :index => 0)
+      textField.set filepath
+    else
+      fail("Failed to Find the FileName Text Field")
+    end
+
+    ### Validate the Text_field is not empty after filepath added
+    if textField.value == ""
+      fail("Edit Text Field is Empty")
+    end
+
+    ### Validate the Open button exists
+    ### if exists then perform click on Open button
+    if window.button(:value => "&Save").exists?
+      window.button(:value => "&Save").click
+    else
+      fail "Failed to Find Open button on window dialog box"
+    end
+
+    ### Validate After Clicking Open button the window dialog box should not exists
+    if window.exists?
+      fail "Window dialog box still exists even after clicking on Open button"
+    end
+  else
+    fail "Failed to Initialize the Window"
+  end
+end
+
+
+
+client = Selenium::WebDriver::Remote::Http::Default.new
+client.timeout = 2000 # seconds – default is 60
+caps = Selenium::WebDriver::Remote::Capabilities.internet_explorer(
+    #:nativeEvents => false,
+    #:requireWindowFocus => true,
+    :initialBrowserUrl              => 'about:blank',
+    :enablePersistentHover          => false,
+    :ignoreProtectedModeSettings    => true,
+    'ie.ensureCleanSession'         => true,
+    :unexpectedAlertBehaviour       => 'ignore'
+)
+@browser = Watir::Browser.new :ie, :http_client => client, :desired_capabilities => caps
+
+
+
+
+
+
+
+
+
+
+
+$hResult = WinActivate("File Download - Security Warning")
+If($hResult == 0) Then
+_Log("Unable to find Download Window from IE")
+Else
+$IETitle=WinGetTitle("File Download - Security Warning")
+_Log("Download Window activated"&$IETitle)
+WinActivate($IETitle)
+ControlClick($IETitle, "","[CLASS:Button; INSTANCE:2]")
+_Log("FileChooser Window opend")
+_Log("CommandLine Parameter Found and Value is:"&$CmdLine[2])
+WinActivate("Save As")
+_Log("FileChooser Window opend"&WinGetTitle("Save As"))
+ControlSetText(WinGetTitle("Save As"),"","Edit1",$CmdLine[2])
+Send("!s")
+EndIf
+EndFunc
+
+
+
+
+
+
+
+
+
+
+
+
+
+require 'win32ole'
+$ai = ::WIN32OLE.new('AutoItX3.Control')
+$ai.WinActivate("File Download")
+$ai.WinWait("[DirectUIHWND]", "",1)
 
